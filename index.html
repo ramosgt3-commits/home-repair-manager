@@ -85,29 +85,18 @@
 
     button {
       width: 100%;
-      padding: 14px;
-      margin-top: 12px;
+      padding: 12px;
+      margin-top: 8px;
       border-radius: 6px;
       border: none;
       font-weight: bold;
-      font-size: 14px;
+      font-size: 13px;
       cursor: pointer;
     }
 
-    .primary-btn {
-      background: var(--orange);
-      color: white;
-    }
-
-    .secondary-btn {
-      background: var(--steel);
-      color: white;
-    }
-
-    .danger-btn {
-      background: var(--danger);
-      color: white;
-    }
+    .primary-btn { background: var(--orange); color: white; }
+    .secondary-btn { background: var(--steel); color: white; }
+    .danger-btn { background: var(--danger); color: white; }
 
     .job {
       background: #f9fafb;
@@ -118,9 +107,9 @@
       position: relative;
     }
 
-    .job.paid { border-left-color: var(--success); }
-    .job.inprogress { border-left-color: var(--warning); }
-    .job.completed { border-left-color: var(--orange); }
+    .paid { border-left-color: var(--success); }
+    .inprogress { border-left-color: var(--warning); }
+    .completed { border-left-color: var(--orange); }
 
     .value-badge {
       position: absolute;
@@ -134,14 +123,11 @@
       font-weight: bold;
     }
 
-    .high-value {
-      background: #fff7ed;
-    }
+    .high-value { background: #fff7ed; }
 
-    .actions button {
-      margin-top: 8px;
-      font-size: 12px;
-      padding: 8px;
+    .money-line {
+      margin-top: 6px;
+      font-size: 13px;
     }
 
   </style>
@@ -165,28 +151,27 @@
     <h2 id="activeJobs">0</h2>
   </div>
   <div class="stat">
-    Revenue
-    <h2>$<span id="totalRevenue">0</span></h2>
+    Money Collected
+    <h2>$<span id="moneyCollected">0</span></h2>
   </div>
   <div class="stat">
-    Paid Jobs
-    <h2 id="paidJobs">0</h2>
+    Outstanding Balance
+    <h2>$<span id="outstandingBalance">0</span></h2>
   </div>
 </div>
 
 <div class="card">
   <h3>Add New Job</h3>
   <input id="customer" placeholder="Customer Name">
-  <input id="phone" placeholder="Phone">
-  <input id="address" placeholder="Address">
   <input id="type" placeholder="Type of Work">
-  <input id="estimate" placeholder="Estimate Amount">
+  <input id="estimate" placeholder="Total Job Price">
+  <input id="deposit" placeholder="Deposit Received (0 if none)">
   <select id="status">
     <option>Estimate Sent</option>
     <option>Approved</option>
     <option>In Progress</option>
     <option>Completed</option>
-    <option>Paid</option>
+    <option>Paid in Full</option>
   </select>
   <button class="primary-btn" onclick="addJob()">Add Job</button>
 </div>
@@ -209,58 +194,59 @@ function renderJobs() {
   const jobsDiv = document.getElementById("jobs");
   jobsDiv.innerHTML = "";
 
-  let totalRevenue = 0;
   let activeJobs = 0;
-  let paidJobs = 0;
+  let moneyCollected = 0;
+  let outstandingBalance = 0;
 
   jobs.forEach((job, index) => {
-    const estimateValue = Number(job.estimate) || 0;
-    totalRevenue += estimateValue;
 
-    if (job.status !== "Completed" && job.status !== "Paid") {
-      activeJobs++;
-    }
+    const total = Number(job.estimate) || 0;
+    const deposit = Number(job.deposit) || 0;
+    const balance = total - deposit;
 
-    if (job.status === "Paid") {
-      paidJobs++;
-    }
+    if (job.status !== "Paid in Full") activeJobs++;
+
+    moneyCollected += deposit;
+    outstandingBalance += balance > 0 ? balance : 0;
 
     let statusClass = "";
-    if (job.status === "Paid") statusClass = "paid";
+    if (job.status === "Paid in Full") statusClass = "paid";
     if (job.status === "In Progress") statusClass = "inprogress";
     if (job.status === "Completed") statusClass = "completed";
 
-    let highValueClass = estimateValue > 5000 ? "high-value" : "";
+    let highValueClass = total > 5000 ? "high-value" : "";
 
     jobsDiv.innerHTML += `
       <div class="job ${statusClass} ${highValueClass}">
-        <span class="value-badge">$${estimateValue}</span>
+        <span class="value-badge">$${total}</span>
         <strong>${job.customer}</strong><br>
         ${job.type}<br>
-        Status: ${job.status}
-        <div class="actions">
-          <button class="secondary-btn" onclick="updateStatus(${index}, 'In Progress')">Start</button>
-          <button class="secondary-btn" onclick="updateStatus(${index}, 'Completed')">Complete</button>
-          <button class="primary-btn" onclick="updateStatus(${index}, 'Paid')">Mark Paid</button>
-          <button class="danger-btn" onclick="deleteJob(${index})">Delete</button>
+        <div class="money-line">
+          Deposit: $${deposit}
         </div>
+        <div class="money-line">
+          Balance Due: $${balance}
+        </div>
+        Status: ${job.status}
+        <button class="secondary-btn" onclick="addPayment(${index})">Add Payment</button>
+        <button class="primary-btn" onclick="markPaid(${index})">Mark Paid in Full</button>
+        <button class="danger-btn" onclick="deleteJob(${index})">Delete</button>
       </div>
     `;
   });
 
   document.getElementById("totalJobs").innerText = jobs.length;
   document.getElementById("activeJobs").innerText = activeJobs;
-  document.getElementById("totalRevenue").innerText = totalRevenue;
-  document.getElementById("paidJobs").innerText = paidJobs;
+  document.getElementById("moneyCollected").innerText = moneyCollected;
+  document.getElementById("outstandingBalance").innerText = outstandingBalance;
 }
 
 function addJob() {
   const job = {
     customer: document.getElementById("customer").value,
-    phone: document.getElementById("phone").value,
-    address: document.getElementById("address").value,
     type: document.getElementById("type").value,
     estimate: document.getElementById("estimate").value,
+    deposit: document.getElementById("deposit").value || 0,
     status: document.getElementById("status").value
   };
 
@@ -271,18 +257,29 @@ function addJob() {
   document.querySelectorAll("input").forEach(input => input.value = "");
 }
 
+function addPayment(index) {
+  let payment = prompt("Enter payment amount received:");
+  if (!payment) return;
+
+  jobs[index].deposit = Number(jobs[index].deposit) + Number(payment);
+  saveJobs();
+  renderJobs();
+}
+
+function markPaid(index) {
+  const total = Number(jobs[index].estimate);
+  jobs[index].deposit = total;
+  jobs[index].status = "Paid in Full";
+  saveJobs();
+  renderJobs();
+}
+
 function deleteJob(index) {
   if (confirm("Delete this job?")) {
     jobs.splice(index, 1);
     saveJobs();
     renderJobs();
   }
-}
-
-function updateStatus(index, newStatus) {
-  jobs[index].status = newStatus;
-  saveJobs();
-  renderJobs();
 }
 
 renderJobs();

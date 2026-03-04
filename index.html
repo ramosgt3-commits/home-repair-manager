@@ -4,29 +4,43 @@
   <title>SR Home Repair & Flooring</title>
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <style>
-    body {
-      font-family: -apple-system, BlinkMacSystemFont, sans-serif;
-      background: #f3f4f6;
-      margin: 0;
-      padding: 20px;
+    :root {
+      --primary: #1f2937;
+      --accent: #2563eb;
+      --success: #16a34a;
+      --warning: #f59e0b;
+      --danger: #dc2626;
+      --bg: #eef2f7;
     }
 
-    h1 {
+    body {
+      margin: 0;
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+      background: var(--bg);
+    }
+
+    .header {
+      background: var(--primary);
+      color: white;
+      padding: 20px;
       text-align: center;
-      margin-bottom: 25px;
+      font-size: 20px;
+      font-weight: 600;
+      letter-spacing: 1px;
     }
 
     .container {
       max-width: 750px;
       margin: auto;
+      padding: 20px;
     }
 
     .card {
       background: white;
       padding: 20px;
       margin-bottom: 20px;
-      border-radius: 14px;
-      box-shadow: 0 6px 18px rgba(0,0,0,0.05);
+      border-radius: 16px;
+      box-shadow: 0 10px 25px rgba(0,0,0,0.06);
     }
 
     .dashboard {
@@ -36,75 +50,100 @@
     }
 
     .stat {
-      background: #111827;
+      background: var(--primary);
       color: white;
       padding: 18px;
-      border-radius: 12px;
+      border-radius: 14px;
       text-align: center;
     }
 
-    input, select, button {
+    .stat h2 {
+      margin: 8px 0 0 0;
+      font-size: 22px;
+    }
+
+    input, select {
       width: 100%;
-      padding: 12px;
-      margin-top: 8px;
-      border-radius: 8px;
+      padding: 14px;
+      margin-top: 10px;
+      border-radius: 10px;
       border: 1px solid #ddd;
-      font-size: 14px;
+      font-size: 15px;
     }
 
     button {
-      background: #111827;
-      color: white;
+      width: 100%;
+      padding: 14px;
+      margin-top: 12px;
+      border-radius: 10px;
       border: none;
-      font-weight: bold;
+      font-size: 14px;
+      font-weight: 600;
       cursor: pointer;
     }
 
-    .job {
-      border-left: 6px solid #111827;
-      padding: 15px;
-      margin-bottom: 15px;
-      background: #f9fafb;
-      border-radius: 8px;
+    .primary-btn {
+      background: var(--accent);
+      color: white;
     }
 
-    .paid { border-left-color: #16a34a; }
-    .inprogress { border-left-color: #f59e0b; }
-    .completed { border-left-color: #2563eb; }
+    .secondary-btn {
+      background: var(--primary);
+      color: white;
+    }
 
-    .action-buttons button {
+    .danger-btn {
+      background: var(--danger);
+      color: white;
+    }
+
+    .job {
+      background: #f9fafb;
+      padding: 16px;
+      border-radius: 14px;
+      margin-bottom: 15px;
+      border-left: 6px solid var(--primary);
+    }
+
+    .job.paid { border-left-color: var(--success); }
+    .job.inprogress { border-left-color: var(--warning); }
+    .job.completed { border-left-color: var(--accent); }
+
+    .job strong {
+      font-size: 16px;
+    }
+
+    .actions button {
       margin-top: 8px;
       font-size: 12px;
       padding: 8px;
-    }
-
-    .delete-btn {
-      background: #dc2626;
     }
 
   </style>
 </head>
 <body>
 
-<div class="container">
+<div class="header">
+  SR HOME REPAIR & FLOORING
+</div>
 
-<h1>SR Home Repair & Flooring</h1>
+<div class="container">
 
 <div class="card dashboard">
   <div class="stat">
-    <div>Total Jobs</div>
+    Total Jobs
     <h2 id="totalJobs">0</h2>
   </div>
   <div class="stat">
-    <div>Active Jobs</div>
+    Active Jobs
     <h2 id="activeJobs">0</h2>
   </div>
   <div class="stat">
-    <div>Total Revenue</div>
+    Revenue
     <h2>$<span id="totalRevenue">0</span></h2>
   </div>
   <div class="stat">
-    <div>Paid Jobs</div>
+    Paid Jobs
     <h2 id="paidJobs">0</h2>
   </div>
 </div>
@@ -123,7 +162,7 @@
     <option>Completed</option>
     <option>Paid</option>
   </select>
-  <button onclick="addJob()">Add Job</button>
+  <button class="primary-btn" onclick="addJob()">Add Job</button>
 </div>
 
 <div class="card">
@@ -170,11 +209,11 @@ function renderJobs() {
         ${job.type}<br>
         $${job.estimate}<br>
         Status: ${job.status}
-        <div class="action-buttons">
-          <button onclick="updateStatus(${index}, 'In Progress')">Start</button>
-          <button onclick="updateStatus(${index}, 'Completed')">Complete</button>
-          <button onclick="updateStatus(${index}, 'Paid')">Mark Paid</button>
-          <button class="delete-btn" onclick="deleteJob(${index})">Delete</button>
+        <div class="actions">
+          <button class="secondary-btn" onclick="updateStatus(${index}, 'In Progress')">Start</button>
+          <button class="secondary-btn" onclick="updateStatus(${index}, 'Completed')">Complete</button>
+          <button class="primary-btn" onclick="updateStatus(${index}, 'Paid')">Mark Paid</button>
+          <button class="danger-btn" onclick="deleteJob(${index})">Delete</button>
         </div>
       </div>
     `;

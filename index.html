@@ -13,11 +13,11 @@
 
     h1 {
       text-align: center;
-      margin-bottom: 30px;
+      margin-bottom: 25px;
     }
 
     .container {
-      max-width: 700px;
+      max-width: 750px;
       margin: auto;
     }
 
@@ -25,8 +25,8 @@
       background: white;
       padding: 20px;
       margin-bottom: 20px;
-      border-radius: 12px;
-      box-shadow: 0 4px 10px rgba(0,0,0,0.05);
+      border-radius: 14px;
+      box-shadow: 0 6px 18px rgba(0,0,0,0.05);
     }
 
     .dashboard {
@@ -38,8 +38,8 @@
     .stat {
       background: #111827;
       color: white;
-      padding: 15px;
-      border-radius: 10px;
+      padding: 18px;
+      border-radius: 12px;
       text-align: center;
     }
 
@@ -57,6 +57,7 @@
       color: white;
       border: none;
       font-weight: bold;
+      cursor: pointer;
     }
 
     .job {
@@ -67,21 +68,18 @@
       border-radius: 8px;
     }
 
-    .paid {
-      border-left-color: #16a34a;
-    }
+    .paid { border-left-color: #16a34a; }
+    .inprogress { border-left-color: #f59e0b; }
+    .completed { border-left-color: #2563eb; }
 
-    .inprogress {
-      border-left-color: #f59e0b;
-    }
-
-    .completed {
-      border-left-color: #2563eb;
+    .action-buttons button {
+      margin-top: 8px;
+      font-size: 12px;
+      padding: 8px;
     }
 
     .delete-btn {
       background: #dc2626;
-      margin-top: 10px;
     }
 
   </style>
@@ -104,6 +102,10 @@
   <div class="stat">
     <div>Total Revenue</div>
     <h2>$<span id="totalRevenue">0</span></h2>
+  </div>
+  <div class="stat">
+    <div>Paid Jobs</div>
+    <h2 id="paidJobs">0</h2>
   </div>
 </div>
 
@@ -144,12 +146,17 @@ function renderJobs() {
 
   let totalRevenue = 0;
   let activeJobs = 0;
+  let paidJobs = 0;
 
   jobs.forEach((job, index) => {
     totalRevenue += Number(job.estimate) || 0;
 
     if (job.status !== "Completed" && job.status !== "Paid") {
       activeJobs++;
+    }
+
+    if (job.status === "Paid") {
+      paidJobs++;
     }
 
     let statusClass = "";
@@ -162,8 +169,13 @@ function renderJobs() {
         <strong>${job.customer}</strong><br>
         ${job.type}<br>
         $${job.estimate}<br>
-        Status: ${job.status}<br>
-        <button class="delete-btn" onclick="deleteJob(${index})">Delete</button>
+        Status: ${job.status}
+        <div class="action-buttons">
+          <button onclick="updateStatus(${index}, 'In Progress')">Start</button>
+          <button onclick="updateStatus(${index}, 'Completed')">Complete</button>
+          <button onclick="updateStatus(${index}, 'Paid')">Mark Paid</button>
+          <button class="delete-btn" onclick="deleteJob(${index})">Delete</button>
+        </div>
       </div>
     `;
   });
@@ -171,6 +183,7 @@ function renderJobs() {
   document.getElementById("totalJobs").innerText = jobs.length;
   document.getElementById("activeJobs").innerText = activeJobs;
   document.getElementById("totalRevenue").innerText = totalRevenue;
+  document.getElementById("paidJobs").innerText = paidJobs;
 }
 
 function addJob() {
@@ -191,7 +204,15 @@ function addJob() {
 }
 
 function deleteJob(index) {
-  jobs.splice(index, 1);
+  if (confirm("Delete this job?")) {
+    jobs.splice(index, 1);
+    saveJobs();
+    renderJobs();
+  }
+}
+
+function updateStatus(index, newStatus) {
+  jobs[index].status = newStatus;
   saveJobs();
   renderJobs();
 }

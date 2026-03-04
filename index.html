@@ -115,11 +115,28 @@
       border-radius: 8px;
       margin-bottom: 15px;
       border-left: 6px solid var(--steel);
+      position: relative;
     }
 
     .job.paid { border-left-color: var(--success); }
     .job.inprogress { border-left-color: var(--warning); }
     .job.completed { border-left-color: var(--orange); }
+
+    .value-badge {
+      position: absolute;
+      right: 15px;
+      top: 15px;
+      background: var(--orange);
+      color: white;
+      padding: 4px 8px;
+      font-size: 12px;
+      border-radius: 4px;
+      font-weight: bold;
+    }
+
+    .high-value {
+      background: #fff7ed;
+    }
 
     .actions button {
       margin-top: 8px;
@@ -197,7 +214,8 @@ function renderJobs() {
   let paidJobs = 0;
 
   jobs.forEach((job, index) => {
-    totalRevenue += Number(job.estimate) || 0;
+    const estimateValue = Number(job.estimate) || 0;
+    totalRevenue += estimateValue;
 
     if (job.status !== "Completed" && job.status !== "Paid") {
       activeJobs++;
@@ -212,11 +230,13 @@ function renderJobs() {
     if (job.status === "In Progress") statusClass = "inprogress";
     if (job.status === "Completed") statusClass = "completed";
 
+    let highValueClass = estimateValue > 5000 ? "high-value" : "";
+
     jobsDiv.innerHTML += `
-      <div class="job ${statusClass}">
+      <div class="job ${statusClass} ${highValueClass}">
+        <span class="value-badge">$${estimateValue}</span>
         <strong>${job.customer}</strong><br>
         ${job.type}<br>
-        $${job.estimate}<br>
         Status: ${job.status}
         <div class="actions">
           <button class="secondary-btn" onclick="updateStatus(${index}, 'In Progress')">Start</button>

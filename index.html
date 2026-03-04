@@ -1,54 +1,114 @@
 <!DOCTYPE html>
 <html>
 <head>
-  <title>Home Repair Job Manager</title>
+  <title>SR Home Repair & Flooring</title>
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <style>
     body {
-      font-family: Arial;
+      font-family: -apple-system, BlinkMacSystemFont, sans-serif;
+      background: #f3f4f6;
+      margin: 0;
       padding: 20px;
-      background: #f4f4f4;
     }
+
     h1 {
       text-align: center;
+      margin-bottom: 30px;
     }
+
+    .container {
+      max-width: 700px;
+      margin: auto;
+    }
+
     .card {
       background: white;
-      padding: 15px;
-      margin-bottom: 15px;
-      border-radius: 8px;
-      box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+      padding: 20px;
+      margin-bottom: 20px;
+      border-radius: 12px;
+      box-shadow: 0 4px 10px rgba(0,0,0,0.05);
     }
+
+    .dashboard {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 15px;
+    }
+
+    .stat {
+      background: #111827;
+      color: white;
+      padding: 15px;
+      border-radius: 10px;
+      text-align: center;
+    }
+
     input, select, button {
       width: 100%;
-      padding: 8px;
-      margin: 5px 0;
+      padding: 12px;
+      margin-top: 8px;
+      border-radius: 8px;
+      border: 1px solid #ddd;
+      font-size: 14px;
     }
+
     button {
-      background: black;
+      background: #111827;
       color: white;
       border: none;
-      cursor: pointer;
+      font-weight: bold;
     }
+
     .job {
-      border-bottom: 1px solid #ddd;
-      padding: 10px 0;
+      border-left: 6px solid #111827;
+      padding: 15px;
+      margin-bottom: 15px;
+      background: #f9fafb;
+      border-radius: 8px;
     }
+
+    .paid {
+      border-left-color: #16a34a;
+    }
+
+    .inprogress {
+      border-left-color: #f59e0b;
+    }
+
+    .completed {
+      border-left-color: #2563eb;
+    }
+
+    .delete-btn {
+      background: #dc2626;
+      margin-top: 10px;
+    }
+
   </style>
 </head>
 <body>
 
-<h1>Home Repair & Flooring</h1>
+<div class="container">
 
-<div class="card">
-  <h2>Dashboard</h2>
-  <p>Total Jobs: <span id="totalJobs">0</span></p>
-  <p>Active Jobs: <span id="activeJobs">0</span></p>
-  <p>Total Estimated Revenue: $<span id="totalRevenue">0</span></p>
+<h1>SR Home Repair & Flooring</h1>
+
+<div class="card dashboard">
+  <div class="stat">
+    <div>Total Jobs</div>
+    <h2 id="totalJobs">0</h2>
+  </div>
+  <div class="stat">
+    <div>Active Jobs</div>
+    <h2 id="activeJobs">0</h2>
+  </div>
+  <div class="stat">
+    <div>Total Revenue</div>
+    <h2>$<span id="totalRevenue">0</span></h2>
+  </div>
 </div>
 
 <div class="card">
-  <h2>Add New Job</h2>
+  <h3>Add New Job</h3>
   <input id="customer" placeholder="Customer Name">
   <input id="phone" placeholder="Phone">
   <input id="address" placeholder="Address">
@@ -65,70 +125,78 @@
 </div>
 
 <div class="card">
-  <h2>Job List</h2>
+  <h3>Job List</h3>
   <div id="jobs"></div>
 </div>
 
+</div>
+
 <script>
-  let jobs = JSON.parse(localStorage.getItem("jobs")) || [];
+let jobs = JSON.parse(localStorage.getItem("jobs")) || [];
 
-  function saveJobs() {
-    localStorage.setItem("jobs", JSON.stringify(jobs));
-  }
+function saveJobs() {
+  localStorage.setItem("jobs", JSON.stringify(jobs));
+}
 
-  function renderJobs() {
-    const jobsDiv = document.getElementById("jobs");
-    jobsDiv.innerHTML = "";
+function renderJobs() {
+  const jobsDiv = document.getElementById("jobs");
+  jobsDiv.innerHTML = "";
 
-    let totalRevenue = 0;
-    let activeJobs = 0;
+  let totalRevenue = 0;
+  let activeJobs = 0;
 
-    jobs.forEach((job, index) => {
-      totalRevenue += Number(job.estimate) || 0;
+  jobs.forEach((job, index) => {
+    totalRevenue += Number(job.estimate) || 0;
 
-      if (job.status !== "Completed" && job.status !== "Paid") {
-        activeJobs++;
-      }
+    if (job.status !== "Completed" && job.status !== "Paid") {
+      activeJobs++;
+    }
 
-      jobsDiv.innerHTML += `
-        <div class="job">
-          <strong>${job.customer}</strong><br>
-          ${job.type} - $${job.estimate}<br>
-          Status: ${job.status}<br>
-          <button onclick="deleteJob(${index})">Delete</button>
-        </div>
-      `;
-    });
+    let statusClass = "";
+    if (job.status === "Paid") statusClass = "paid";
+    if (job.status === "In Progress") statusClass = "inprogress";
+    if (job.status === "Completed") statusClass = "completed";
 
-    document.getElementById("totalJobs").innerText = jobs.length;
-    document.getElementById("activeJobs").innerText = activeJobs;
-    document.getElementById("totalRevenue").innerText = totalRevenue;
-  }
+    jobsDiv.innerHTML += `
+      <div class="job ${statusClass}">
+        <strong>${job.customer}</strong><br>
+        ${job.type}<br>
+        $${job.estimate}<br>
+        Status: ${job.status}<br>
+        <button class="delete-btn" onclick="deleteJob(${index})">Delete</button>
+      </div>
+    `;
+  });
 
-  function addJob() {
-    const job = {
-      customer: document.getElementById("customer").value,
-      phone: document.getElementById("phone").value,
-      address: document.getElementById("address").value,
-      type: document.getElementById("type").value,
-      estimate: document.getElementById("estimate").value,
-      status: document.getElementById("status").value
-    };
+  document.getElementById("totalJobs").innerText = jobs.length;
+  document.getElementById("activeJobs").innerText = activeJobs;
+  document.getElementById("totalRevenue").innerText = totalRevenue;
+}
 
-    jobs.push(job);
-    saveJobs();
-    renderJobs();
+function addJob() {
+  const job = {
+    customer: document.getElementById("customer").value,
+    phone: document.getElementById("phone").value,
+    address: document.getElementById("address").value,
+    type: document.getElementById("type").value,
+    estimate: document.getElementById("estimate").value,
+    status: document.getElementById("status").value
+  };
 
-    document.querySelectorAll("input").forEach(input => input.value = "");
-  }
-
-  function deleteJob(index) {
-    jobs.splice(index, 1);
-    saveJobs();
-    renderJobs();
-  }
-
+  jobs.push(job);
+  saveJobs();
   renderJobs();
+
+  document.querySelectorAll("input").forEach(input => input.value = "");
+}
+
+function deleteJob(index) {
+  jobs.splice(index, 1);
+  saveJobs();
+  renderJobs();
+}
+
+renderJobs();
 </script>
 
 </body>

@@ -41,6 +41,13 @@
 <h1>Home Repair & Flooring</h1>
 
 <div class="card">
+  <h2>Dashboard</h2>
+  <p>Total Jobs: <span id="totalJobs">0</span></p>
+  <p>Active Jobs: <span id="activeJobs">0</span></p>
+  <p>Total Estimated Revenue: $<span id="totalRevenue">0</span></p>
+</div>
+
+<div class="card">
   <h2>Add New Job</h2>
   <input id="customer" placeholder="Customer Name">
   <input id="phone" placeholder="Phone">
@@ -72,7 +79,17 @@
   function renderJobs() {
     const jobsDiv = document.getElementById("jobs");
     jobsDiv.innerHTML = "";
+
+    let totalRevenue = 0;
+    let activeJobs = 0;
+
     jobs.forEach((job, index) => {
+      totalRevenue += Number(job.estimate) || 0;
+
+      if (job.status !== "Completed" && job.status !== "Paid") {
+        activeJobs++;
+      }
+
       jobsDiv.innerHTML += `
         <div class="job">
           <strong>${job.customer}</strong><br>
@@ -82,6 +99,10 @@
         </div>
       `;
     });
+
+    document.getElementById("totalJobs").innerText = jobs.length;
+    document.getElementById("activeJobs").innerText = activeJobs;
+    document.getElementById("totalRevenue").innerText = totalRevenue;
   }
 
   function addJob() {

@@ -1,1 +1,114 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <title>Home Repair Job Manager</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <style>
+    body {
+      font-family: Arial;
+      padding: 20px;
+      background: #f4f4f4;
+    }
+    h1 {
+      text-align: center;
+    }
+    .card {
+      background: white;
+      padding: 15px;
+      margin-bottom: 15px;
+      border-radius: 8px;
+      box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+    }
+    input, select, button {
+      width: 100%;
+      padding: 8px;
+      margin: 5px 0;
+    }
+    button {
+      background: black;
+      color: white;
+      border: none;
+      cursor: pointer;
+    }
+    .job {
+      border-bottom: 1px solid #ddd;
+      padding: 10px 0;
+    }
+  </style>
+</head>
+<body>
 
+<h1>Home Repair & Flooring</h1>
+
+<div class="card">
+  <h2>Add New Job</h2>
+  <input id="customer" placeholder="Customer Name">
+  <input id="phone" placeholder="Phone">
+  <input id="address" placeholder="Address">
+  <input id="type" placeholder="Type of Work">
+  <input id="estimate" placeholder="Estimate Amount">
+  <select id="status">
+    <option>Estimate Sent</option>
+    <option>Approved</option>
+    <option>In Progress</option>
+    <option>Completed</option>
+    <option>Paid</option>
+  </select>
+  <button onclick="addJob()">Add Job</button>
+</div>
+
+<div class="card">
+  <h2>Job List</h2>
+  <div id="jobs"></div>
+</div>
+
+<script>
+  let jobs = JSON.parse(localStorage.getItem("jobs")) || [];
+
+  function saveJobs() {
+    localStorage.setItem("jobs", JSON.stringify(jobs));
+  }
+
+  function renderJobs() {
+    const jobsDiv = document.getElementById("jobs");
+    jobsDiv.innerHTML = "";
+    jobs.forEach((job, index) => {
+      jobsDiv.innerHTML += `
+        <div class="job">
+          <strong>${job.customer}</strong><br>
+          ${job.type} - $${job.estimate}<br>
+          Status: ${job.status}<br>
+          <button onclick="deleteJob(${index})">Delete</button>
+        </div>
+      `;
+    });
+  }
+
+  function addJob() {
+    const job = {
+      customer: document.getElementById("customer").value,
+      phone: document.getElementById("phone").value,
+      address: document.getElementById("address").value,
+      type: document.getElementById("type").value,
+      estimate: document.getElementById("estimate").value,
+      status: document.getElementById("status").value
+    };
+
+    jobs.push(job);
+    saveJobs();
+    renderJobs();
+
+    document.querySelectorAll("input").forEach(input => input.value = "");
+  }
+
+  function deleteJob(index) {
+    jobs.splice(index, 1);
+    saveJobs();
+    renderJobs();
+  }
+
+  renderJobs();
+</script>
+
+</body>
+</html>
